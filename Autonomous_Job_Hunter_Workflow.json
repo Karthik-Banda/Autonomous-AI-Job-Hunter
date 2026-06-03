@@ -1,0 +1,505 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -688,
+        0
+      ],
+      "id": "53a98f99-05e7-4bec-a14d-da192faab967",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search.json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google_jobs"
+            },
+            {
+              "name": "q",
+              "value": "\"Junior Full Stack Developer\""
+            },
+            {
+              "name": "location",
+              "value": "Hyderabad, Telangana, India"
+            },
+            {
+              "name": "api_key",
+              "value": "dc74061c8b9a77200557535890e7f27a4d130559059694bb86973c8acfb4d0ae"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"job_title\": \"Data Analyst\",\n  \"location\": \"Hyderabad, Telangana, India\",\n  \"jobs_entries\": 3,\n  \"posted_within\": \"Past 24 hours\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -512,
+        0
+      ],
+      "id": "bb4694f0-c6d2-45c6-886b-94e75a3530e9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are an expert technical recruiter and career coach.\nAnalyze the provided Job Description against the candidate's resume and extract the required information based on the requested output schema.\n\nRULES:\n- Determine \"is_match\" using this rule: true if at least 70% of required skills match, false otherwise.\n- If visa requirements are not mentioned, output \"Not specified in the job description\".\n- Return ONLY valid JSON. Do not include markdown formatting or code blocks.\n-Extract the link to apply for the job the directs to the application portal\n- Write a persuasive, 3-paragraph \"cover_letter\" explicitly connecting my resume projects (like ReserveBag or Apothecary Garden) to the responsibilities in the Job Description. Keep it under 250 words.\n\nRESUME SUMMARY:\nName: B Karthik | Location: Hyderabad, India | Fresh Graduate: May 2025\nSkills: C#, .NET 8, ASP.NET Core, React.js, JavaScript, Tailwind CSS, PostgreSQL, SQL Server, Supabase, Entity Framework Core, ADO.NET, Docker, Git, GitHub, Vercel, Render, REST APIs, OOP, MVC, AI/ML (YOLOv8, Computer Vision)\nProjects:\n- ReserveBag: Full-stack e-commerce app (React + .NET 8 + PostgreSQL + Supabase + Docker)\n- Apothecary Garden: AI plant app (React + Gemini Vision API + LocalStorage + Vercel)\n- Italian Wildlife AI Web App: Real-time object detection and tracking\n- Student Management System: Desktop app (C# + SQL Server + ADO.NET)\n\nJOB DESCRIPTION TO EVALUATE:\nCompany: {{ $json.company_name }}\nJob Title: {{ $json.title }}\nLocation: {{ $json.location }}.\nApply Link: {{ $json.source_link || $json.share_link }}\n\nJob Description:\n{{ $json.description }}\n\nEvaluate this JD against my resume. Return a JSON object with EXACTLY these keys: is_match, company_name, job_title, match_score, matching_skills, missing_skills, experience_relevance, location_compatibility, visa_requirements, recommendation, interview_prep,apply_link, cover_letter.",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=={{ $json.description\n $json.sourse_link }}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        416,
+        0
+      ],
+      "id": "dec5b554-a154-4d45-960a-11f167338797",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b18fd28e-b2cb-4dd4-b527-86ab4847d9dc",
+              "leftValue": "={{ $json.output.is_match }}",
+              "rightValue": "no match",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        768,
+        0
+      ],
+      "id": "5e54f50f-eff9-42e2-bbde-e1c8f68de1e6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        304,
+        208
+      ],
+      "id": "6580a1ae-ce91-48f4-aca4-7369f213e7fa",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "O2uLJmFPu4gmDmzs",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        208
+      ],
+      "id": "05cba707-fd5f-41ac-8f46-d75bf2000638",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MvV9LD7x7nC4vdVt",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        208
+      ],
+      "id": "df24abdd-b62b-48c4-94c5-dec68393d3fb",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "jk67KdHEx7csomFm",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"is_match\": true,\n  \"company_name\": \"TechNova\",\n  \"job_title\": \"Developer\",\n  \"match_score\": 85,\n  \"matching_skills\": [\"React\", \"C#\"],\n  \"missing_skills\": [\"Python\"],\n  \"experience_relevance\": \"High\",\n  \"location_compatibility\": \"Hyderabad\",\n  \"visa_requirements\": \"Not specified\",\n  \"recommendation\": \"Apply\",\n  \"interview_prep\": \"Focus on API design.\",\n  \"apply_link\": \"https://www.linkedin.com/jobs/view/123456\",\n\"cover_letter\": \"Dear Hiring Manager, I am writing to apply for...\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        208
+      ],
+      "id": "63bb9310-7f14-4cc4-b287-31f8e80ae3a2",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Grab the JSON response from the preceding HTTP Request node\nconst response = $input.first().json;\n\n// 2. Target the specific array where the API stores the jobs\n// (Using 'jobs_results' for Google Jobs/SerpApi. Falls back to an empty array to prevent crashing)\nconst jobs = response.jobs_results || [];\n\n// 3. Loop through the array and format it exactly how n8n requires\nreturn jobs.map(job => {\n  return {\n    json: job\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        0
+      ],
+      "id": "42f14649-d7c6-402c-80f9-fd0d22937e3d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -112,
+        0
+      ],
+      "id": "09e8798e-e128-48ea-8c22-fe8343633330",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "chatId": "976451110",
+        "text": "=🎯 NEW OMNI-CHANNEL JOB MATCH!\n\n🏢 Company: {{ $json.output.company_name }}\n💼 Role: {{ $json.output.job_title }}\n📍 Location: {{ $json.output.location_compatibility }}\n💰 Salary:{{ $('Code in JavaScript').item.json.detected_extensions.salary }}\n🕒 Type: {{ $('Code in JavaScript').item.json.detected_extensions.schedule_type }}\n📅 Posted:{{ $('Code in JavaScript').item.json.extensions }}  via {{ $('Code in JavaScript').item.json.via }}\n\n🤖 --- AI ANALYSIS --- 🤖\n⭐ Match Score: {{ $json.output.match_score }}/100\n✅ Matching Skills: {{ $json.output.matching_skills }}\n❌ Missing Skills: {{ $json.output.missing_skills }}\n\n💡 Recommendation: {{ $json.output.recommendation }}\n\n🧠 Interview Prep:\n{{ $json.output.interview_prep }}\n\n🔗 Direct Apply Link:{{ $('Code in JavaScript').item.json.source_link }}\n\n🌐 Google Jobs Link: {{ $('Code in JavaScript').item.json.share_link }}\n\nDescription:{{ $('Code in JavaScript').item.json.description.replace(/ /g, '') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        -208
+      ],
+      "id": "e026978e-85ee-4443-895d-5fd1ddebd52a",
+      "name": "Send a text message",
+      "webhookId": "2a189d28-ce9c-4f31-87a2-7145345ab352",
+      "credentials": {
+        "telegramApi": {
+          "id": "PpHMK636pwaCzXOO",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1gfdhF2bCbZYWoY-DhPbNmntpuhB0dXF51SHNFhV_aNI",
+          "mode": "list",
+          "cachedResultName": "AI Job Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gfdhF2bCbZYWoY-DhPbNmntpuhB0dXF51SHNFhV_aNI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gfdhF2bCbZYWoY-DhPbNmntpuhB0dXF51SHNFhV_aNI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $now.toFormat('dd-MM-yyyy') }}",
+            "Company": "={{ $('Loop Over Items').item.json.company_name }}",
+            "Role": "={{ $('If').item.json.output.job_title }}",
+            "Score": "={{ $('If').item.json.output.match_score }}",
+            "Link": "={{ $('If').item.json.output.apply_link }}",
+            "Cover Letter": "={{ $('If').item.json.output.cover_letter }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Role",
+              "displayName": "Role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cover Letter",
+              "displayName": "Cover Letter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        -208
+      ],
+      "id": "b86915c7-0a18-462b-a338-441797d489e3",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rNRZzWYAkQTWRQjT",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "35ddc757-8a1d-47b7-a09d-d256610bf3d9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "88aa0503c1d71614444615bea01aece8339d0dfbd39493635c16c4e17ae889e7"
+  },
+  "id": "xceRtCtZMWaRnazR",
+  "tags": []
+}
