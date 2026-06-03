@@ -38,4 +38,5 @@ An automated, LLM-powered job aggregation and evaluation pipeline built with n8n
 * Batching: The raw JSON array is parsed using JavaScript and fed through a Loop node to prevent API rate limiting.
 * Evaluation: Gemini analyzes the JD, outputs a boolean match score, and generates a cover letter.
 * Routing: An algorithmic IF node filters out rejections. Approved jobs trigger the Telegram Webhook and log to Google Sheets.
+<img width="1920" height="1080" alt="Screenshot 2026-06-03 152146" src="https://github.com/user-attachments/assets/e4143e1d-210a-4c10-9021-6e23024928e2" />
 
