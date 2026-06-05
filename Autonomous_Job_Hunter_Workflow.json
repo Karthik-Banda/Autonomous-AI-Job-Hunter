@@ -228,7 +228,7 @@
     {
       "parameters": {
         "chatId": "976451110",
-        "text": "=🎯 NEW OMNI-CHANNEL JOB MATCH!\n\n🏢 Company: {{ $json.output.company_name }}\n💼 Role: {{ $json.output.job_title }}\n📍 Location: {{ $json.output.location_compatibility }}\n💰 Salary:{{ $('Code in JavaScript').item.json.detected_extensions.salary }}\n🕒 Type: {{ $('Code in JavaScript').item.json.detected_extensions.schedule_type }}\n📅 Posted:{{ $('Code in JavaScript').item.json.extensions }}  via {{ $('Code in JavaScript').item.json.via }}\n\n🤖 --- AI ANALYSIS --- 🤖\n⭐ Match Score: {{ $json.output.match_score }}/100\n✅ Matching Skills: {{ $json.output.matching_skills }}\n❌ Missing Skills: {{ $json.output.missing_skills }}\n\n💡 Recommendation: {{ $json.output.recommendation }}\n\n🧠 Interview Prep:\n{{ $json.output.interview_prep }}\n\n🔗 Direct Apply Link:{{ $('Code in JavaScript').item.json.source_link }}\n\n🌐 Google Jobs Link: {{ $('Code in JavaScript').item.json.share_link }}\n\nDescription:{{ $('Code in JavaScript').item.json.description.replace(/ /g, '') }}",
+        "text": "=🎯 NEW OMNI-CHANNEL JOB MATCH!\n\n🏢 Company: {{ $json.output.company_name }}\n💼 Role: {{ $json.output.job_title }}\n📍 Location: {{ $json.output.location_compatibility }}\n💰 Salary:{{ $('Code in JavaScript').item.json?.detected_extensions?.salary || 'Not specified' }}\n🕒 Type: {{ $('Code in JavaScript').item.json.detected_extensions.schedule_type }}\n📅 Posted:{{ $('Code in JavaScript').item.json.extensions }}  via {{ $('Code in JavaScript').item.json.via }}\n\n🤖 --- AI ANALYSIS --- 🤖\n⭐ Match Score: {{ $json.output.match_score }}/100\n✅ Matching Skills: {{ $json.output.matching_skills }}\n❌ Missing Skills: {{ $json.output.missing_skills }}\n\n💡 Recommendation: {{ $json.output.recommendation }}\n\n🧠 Interview Prep:\n{{ $json.output.interview_prep }}\n\n🔗 Direct Apply Link:{{ $('Code in JavaScript').item.json.source_link }}\n\n🌐 Google Jobs Link: {{ $('Code in JavaScript').item.json.share_link }}\n\nDescription:{{ $('Code in JavaScript').item.json.description.replace(/\\s+ /g, '') }}",
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.telegram",
@@ -353,7 +353,28 @@
       }
     }
   ],
-  "pinData": {},
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2026-06-03T15:21:30.432+05:30",
+          "Readable date": "June 3rd 2026, 3:21:30 pm",
+          "Readable time": "3:21:30 pm",
+          "Day of week": "Wednesday",
+          "Year": "2026",
+          "Month": "June",
+          "Day of month": "03",
+          "Hour": "15",
+          "Minute": "21",
+          "Second": "30",
+          "Timezone": "Asia/Calcutta (UTC+05:30)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
   "connections": {
     "Schedule Trigger": {
       "main": [
@@ -435,7 +456,7 @@
       "main": [
         [
           {
-            "node": "Send a text message",
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -495,7 +516,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "35ddc757-8a1d-47b7-a09d-d256610bf3d9",
+  "versionId": "20c81b70-b58f-47fa-84b8-b91b62b97646",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "88aa0503c1d71614444615bea01aece8339d0dfbd39493635c16c4e17ae889e7"
